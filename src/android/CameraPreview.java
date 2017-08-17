@@ -885,7 +885,15 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
     Camera.Parameters params = camera.getParameters();
 
 	float focalLength = params.getFocalLength();
-	callbackContext.success(focalLength);
+	
+	JSONObject data = new JSONObject();
+    try {
+      data.put("focalLength", new Double((double)focalLength));
+    } catch (JSONException e) {
+      Log.d(TAG, "getFocalLength failed to set output payload");
+    }
+
+	callbackContext.success(data);
     return true;
   }
   
@@ -901,13 +909,14 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
 	float horizontalViewAngle = params.getHorizontalViewAngle();
 	float verticalViewAngle = params.getVerticalViewAngle();
 
-	double sensorWidth = Math.tan(horizontalViewAngle / 2) * 2 * focalLength;
-	double sensorHeight = Math.tan(verticalViewAngle / 2) * 2 * focalLength;
+	double sensorWidth = Math.tan((double)horizontalViewAngle / 2) * 2 * focalLength;
+	double sensorHeight = Math.tan((double)verticalViewAngle / 2) * 2 * focalLength;
 	
     JSONObject data = new JSONObject();
     try {
-      data.put("sensorWidth", sensorWidth);
-      data.put("sensorHeight", sensorHeight);
+	  data.put("focalLength", new Double((double)focalLength));
+      data.put("sensorWidth", new Double(sensorWidth));
+      data.put("sensorHeight", new Double(sensorHeight));
     } catch (JSONException e) {
       Log.d(TAG, "getCameraSensorInfo failed to set output payload");
     }
