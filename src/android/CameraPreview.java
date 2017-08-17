@@ -54,7 +54,9 @@ public class CameraPreview extends CordovaPlugin implements CameraActivity.Camer
   private static final String GET_EXPOSURE_COMPENSATION_RANGE_ACTION = "getExposureCompensationRange";
   private static final String GET_WHITE_BALANCE_MODE_ACTION = "getWhiteBalanceMode";
   private static final String SET_WHITE_BALANCE_MODE_ACTION = "setWhiteBalanceMode";
-
+  private static final String GET_FOCAL_LENGTH_ACTION = "getFocalLength";
+  private static final String GET_CAMERA_SENSOR_INFO_ACTION = "getCameraSensorInfo";
+  
   private static final int CAM_REQ_CODE = 0;
 
   private static final String [] permissions = {
@@ -142,7 +144,11 @@ public class CameraPreview extends CordovaPlugin implements CameraActivity.Camer
       return getWhiteBalanceMode(callbackContext);
     } else if (SET_WHITE_BALANCE_MODE_ACTION.equals(action)) {
       return setWhiteBalanceMode(args.getString(0),callbackContext);
-    }
+    } else if (GET_FOCAL_LENGTH_ACTION.equals(action)) {
+      return getFocalLength(callbackContext);
+    } else if (GET_CAMERA_SENSOR_INFO_ACTION.equals(action)) {
+      return getCameraSensorInfo(callbackContext);
+    }  
     return false;
   }
 
@@ -869,4 +875,45 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
     callbackContext.success();
     return true;
   }
+  
+  private boolean getFocalLength(CallbackContext callbackContext) {
+    if(this.hasCamera(callbackContext) == false){
+      return true;
+    }
+
+    Camera camera = fragment.getCamera();
+    Camera.Parameters params = camera.getParameters();
+
+	float focalLength = params.getFocalLength();
+	callbackContext.success(focalLength);
+    return true;
+  }
+  
+  private boolean getCameraSensorInfo(CallbackContext callbackContext) {
+    if(this.hasCamera(callbackContext) == false){
+      return true;
+    }
+
+    Camera camera = fragment.getCamera();
+    Camera.Parameters params = camera.getParameters();
+
+	float focalLength = params.getFocalLength();
+	float horizontalViewAngle = params.getHorizontalViewAngle();
+	float verticalViewAngle = params.getVerticalViewAngle();
+
+	double sensorWidth = Math.tan(horizontalViewAngle / 2) * 2 * focalLength;
+	double sensorHeight = Math.tan(verticalViewAngle / 2) * 2 * focalLength;
+	
+    JSONObject data = new JSONObject();
+    try {
+      data.put("sensorWidth", sensorWidth);
+      data.put("sensorHeight", sensorHeight);
+    } catch (JSONException e) {
+      Log.d(TAG, "getCameraSensorInfo failed to set output payload");
+    }
+
+	callbackContext.success(data);
+    return true;
+  }
+  
 }
