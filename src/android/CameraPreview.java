@@ -11,6 +11,9 @@ import android.util.TypedValue;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -912,11 +915,19 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
 	double sensorWidth = Math.tan((double)horizontalViewAngle / 2) * 2 * focalLength;
 	double sensorHeight = Math.tan((double)verticalViewAngle / 2) * 2 * focalLength;
 	
+	CameraManager manager = (CameraManager) fragment.getSystemService(Context.CAMERA_SERVICE);
+	String cameraId = getFrontFacingCameraId(manager);
+    SizeF sensorSize = getCameraResolution(manager, 0);
+
     JSONObject data = new JSONObject();
     try {
 	  data.put("focalLength", new Double((double)focalLength));
       data.put("sensorWidth", new Double(sensorWidth));
       data.put("sensorHeight", new Double(sensorHeight));
+	  data.put("cameraId", cameraId);
+      data.put("sensorWidth2", new Double((double)sensorSize.getWidth()));
+      data.put("sensorHeight2", new Double((double)sensorSize.getHeight()));
+
     } catch (JSONException e) {
       Log.d(TAG, "getCameraSensorInfo failed to set output payload");
     }
@@ -924,5 +935,31 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
 	callbackContext.success(data);
     return true;
   }
+
+private SizeF getCameraResolution(CameraManager cManager, int camNum)
+{
+    SizeF size = new SizeF(0,0);
+    try {
+        String[] cameraIds = cManager.getCameraIdList();
+        if (cameraIds.length > camNum) {
+            CameraCharacteristics character = manager.getCameraCharacteristics(cameraIds[camNum]);
+            size = character.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+        }
+    }
+    catch (CameraAccessException e)
+    {
+        Log.e(TAG, e.getMessage(), e);
+    }
+    return size;
+}
+
+String getFrontFacingCameraId(CameraManager cManager){
+    for(final String cameraId : cManager.getCameraIdList()){
+        CameraCharacteristics characteristics = cManager.getCameraCharacteristics(cameraId);
+        int cOrientation = characteristics.get(CameraCharacteristics.LENS_FACING);
+        if(cOrientation == CameraCharacteristics.LENS_FACING_FRONT) return cameraId;
+    }
+    return null;
+}
   
 }
