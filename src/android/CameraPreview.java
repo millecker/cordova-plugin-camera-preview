@@ -14,6 +14,7 @@ import android.widget.FrameLayout;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
+import android.util.SizeF;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
