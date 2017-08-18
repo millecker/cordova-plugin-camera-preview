@@ -959,11 +959,17 @@ private SizeF getCameraResolution(CameraManager cManager, int camNum)
     return size;
 }
 
-String getFrontFacingCameraId(CameraManager cManager){
-    for(final String cameraId : cManager.getCameraIdList()){
-        CameraCharacteristics characteristics = cManager.getCameraCharacteristics(cameraId);
-        int cOrientation = characteristics.get(CameraCharacteristics.LENS_FACING);
-        if(cOrientation == CameraCharacteristics.LENS_FACING_FRONT) return cameraId;
+private String getFrontFacingCameraId(CameraManager cManager){
+	try {
+		for(final String cameraId : cManager.getCameraIdList()){
+			CameraCharacteristics characteristics = cManager.getCameraCharacteristics(cameraId);
+			int cOrientation = characteristics.get(CameraCharacteristics.LENS_FACING);
+			if(cOrientation == CameraCharacteristics.LENS_FACING_FRONT) return cameraId;
+		}
+	}
+    catch (CameraAccessException e)
+    {
+        Log.e(TAG, e.getMessage(), e);
     }
     return null;
 }
