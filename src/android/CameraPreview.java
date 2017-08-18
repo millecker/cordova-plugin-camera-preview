@@ -1,6 +1,7 @@
 package com.cordovaplugincamerapreview;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
