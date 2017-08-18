@@ -7,14 +7,11 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CaptureRequest;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Size;
 import android.util.SizeF;
 import android.util.TypedValue;
 import android.view.ViewGroup;
@@ -63,8 +60,7 @@ public class CameraPreview extends CordovaPlugin implements CameraActivity.Camer
   private static final String GET_EXPOSURE_COMPENSATION_RANGE_ACTION = "getExposureCompensationRange";
   private static final String GET_WHITE_BALANCE_MODE_ACTION = "getWhiteBalanceMode";
   private static final String SET_WHITE_BALANCE_MODE_ACTION = "setWhiteBalanceMode";
-  private static final String GET_FOCAL_LENGTH_ACTION = "getFocalLength";
-  private static final String GET_CAMERA_SENSOR_INFO_ACTION = "getCameraSensorInfo";
+  private static final String GET_CAMERA_CHARACTERISTICS_ACTION = "getCameraCharacteristics";
   
   private static final int CAM_REQ_CODE = 0;
 
@@ -153,10 +149,8 @@ public class CameraPreview extends CordovaPlugin implements CameraActivity.Camer
       return getWhiteBalanceMode(callbackContext);
     } else if (SET_WHITE_BALANCE_MODE_ACTION.equals(action)) {
       return setWhiteBalanceMode(args.getString(0),callbackContext);
-    } else if (GET_FOCAL_LENGTH_ACTION.equals(action)) {
-      return getFocalLength(callbackContext);
-    } else if (GET_CAMERA_SENSOR_INFO_ACTION.equals(action)) {
-      return getCameraSensorInfo(callbackContext);
+    } else if (GET_CAMERA_CHARACTERISTICS_ACTION.equals(action)) {
+      return getCameraCharacteristics(callbackContext);
     }  
     return false;
   }
@@ -885,93 +879,65 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
     return true;
   }
   
-  private boolean getFocalLength(CallbackContext callbackContext) {
+  private boolean getCameraCharacteristics(CallbackContext callbackContext) {
     if(this.hasCamera(callbackContext) == false){
       return true;
     }
 
-    Camera camera = fragment.getCamera();
-    Camera.Parameters params = camera.getParameters();
-
-	float focalLength = params.getFocalLength();
-	
 	JSONObject data = new JSONObject();
-    try {
-      data.put("focalLength", new Double((double)focalLength));
-    } catch (JSONException e) {
-      Log.d(TAG, "getFocalLength failed to set output payload");
-    }
-
-	callbackContext.success(data);
-    return true;
-  }
-  
-  private boolean getCameraSensorInfo(CallbackContext callbackContext) {
-    if(this.hasCamera(callbackContext) == false){
-      return true;
-    }
-
-    Camera camera = fragment.getCamera();
-    Camera.Parameters params = camera.getParameters();
-
-	float focalLength = params.getFocalLength();
-	float horizontalViewAngle = params.getHorizontalViewAngle();
-	float verticalViewAngle = params.getVerticalViewAngle();
-
-	double sensorWidth = Math.tan((double)horizontalViewAngle / 2) * 2 * focalLength;
-	double sensorHeight = Math.tan((double)verticalViewAngle / 2) * 2 * focalLength;
+	JSONArray cameraCharacteristicsArray = new JSONArray();
 	
-	CameraManager manager = (CameraManager) this.cordova.getActivity().getApplicationContext().getSystemService(Context.CAMERA_SERVICE);
-	String cameraId = getFrontFacingCameraId(manager);
-    SizeF sensorSize = getCameraResolution(manager, 0);
-
-    JSONObject data = new JSONObject();
-    try {
-	  data.put("focalLength", new Double((double)focalLength));
-      data.put("sensorWidth", new Double(sensorWidth));
-      data.put("sensorHeight", new Double(sensorHeight));
-	  data.put("cameraId", cameraId);
-      data.put("sensorWidth2", new Double((double)sensorSize.getWidth()));
-      data.put("sensorHeight2", new Double((double)sensorSize.getHeight()));
-
+	// Get the CameraManager
+    CameraManager cManager = (CameraManager) this.cordova.getActivity().getApplicationContext().getSystemService(Context.CAMERA_SERVICE);
+	
+	try {
+		for (String cameraId : cManager.getCameraIdList()) {
+			CameraCharacteristics characteristics = cManager.getCameraCharacteristics(cameraId);
+			
+			JSONObject cameraData = new JSONObject();
+			
+			// INFO_SUPPORTED_HARDWARE_LEVEL
+			Integer supportLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+			cameraData.put("INFO_SUPPORTED_HARDWARE_LEVEL", supportLevel);
+			
+			// LENS_FACING
+			Integer lensFacing = characteristics.get(CameraCharacteristics.LENS_FACING);
+			cameraData.put("LENS_FACING", lensFacing);
+			
+			// SENSOR_INFO_PHYSICAL_SIZE
+			SizeF sensorInfoPhysicalSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+			cameraData.put("SENSOR_INFO_PHYSICAL_SIZE_WIDTH", new Double(sensorInfoPhysicalSize.getWidth()));
+			cameraData.put("SENSOR_INFO_PHYSICAL_SIZE_HEIGHT", new Double(sensorInfoPhysicalSize.getHeight()));
+			
+			// SENSOR_INFO_PIXEL_ARRAY_SIZE
+			Size sensorInfoPhysicalSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PIXEL_ARRAY_SIZE);
+			cameraData.put("SENSOR_INFO_PIXEL_ARRAY_SIZE_WIDTH", new Integer(sensorInfoPhysicalSize.getWidth()));
+			cameraData.put("SENSOR_INFO_PIXEL_ARRAY_SIZE_HEIGHT", new Integer(sensorInfoPhysicalSize.getHeight()));
+			
+			// LENS_INFO_AVAILABLE_FOCAL_LENGTHS
+			float[] focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+			JSONArray focalLengthsArray = new JSONArray();
+			for (int focusId=0; focusId<focalLengths.length; focusId++) {
+				JSONObject focalLengthsData = new JSONObject();
+				focalLengthsData.put("FOCAL_LENGTH", new Double(focalLengths[focusId]));
+				focalLengthsArray.put(focalLengthsData);
+			}
+			cameraData.put("LENS_INFO_AVAILABLE_FOCAL_LENGTHS", focalLengthsArray);
+			
+			// add camera data to result list
+			cameraCharacteristicsArray.put(cameraData);
+		}
+		
+		data.put("CAMERA_CHARACTERISTICS", cameraCharacteristicsArray);
+		
+	} catch (CameraAccessException e) {
+        Log.e(TAG, e.getMessage(), e);
     } catch (JSONException e) {
-      Log.d(TAG, "getCameraSensorInfo failed to set output payload");
+		Log.d(TAG, "getCameraSensorInfo failed to set output payload");
     }
 
 	callbackContext.success(data);
     return true;
   }
-
-private SizeF getCameraResolution(CameraManager cManager, int camNum)
-{
-    SizeF size = new SizeF(0,0);
-    try {
-        String[] cameraIds = cManager.getCameraIdList();
-        if (cameraIds.length > camNum) {
-            CameraCharacteristics character = cManager.getCameraCharacteristics(cameraIds[camNum]);
-            size = character.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
-        }
-    }
-    catch (CameraAccessException e)
-    {
-        Log.e(TAG, e.getMessage(), e);
-    }
-    return size;
-}
-
-private String getFrontFacingCameraId(CameraManager cManager){
-	try {
-		for(final String cameraId : cManager.getCameraIdList()){
-			CameraCharacteristics characteristics = cManager.getCameraCharacteristics(cameraId);
-			int cOrientation = characteristics.get(CameraCharacteristics.LENS_FACING);
-			if(cOrientation == CameraCharacteristics.LENS_FACING_FRONT) return cameraId;
-		}
-	}
-    catch (CameraAccessException e)
-    {
-        Log.e(TAG, e.getMessage(), e);
-    }
-    return null;
-}
-  
+ 
 }

@@ -165,12 +165,8 @@ CameraPreview.setWhiteBalanceMode = function(whiteBalanceMode, onSuccess, onErro
     exec(onSuccess, onError, PLUGIN_NAME, "setWhiteBalanceMode", [whiteBalanceMode]);
 };
 
-CameraPreview.getFocalLength = function(onSuccess, onError) {
-    exec(onSuccess, onError, PLUGIN_NAME, "getFocalLength", []);
-};
-
-CameraPreview.getCameraSensorInfo = function(onSuccess, onError) {
-    exec(onSuccess, onError, PLUGIN_NAME, "getCameraSensorInfo", []);
+CameraPreview.getCameraCharacteristics = function(onSuccess, onError) {
+    exec(onSuccess, onError, PLUGIN_NAME, "getCameraCharacteristics", []);
 };
 
 CameraPreview.FOCUS_MODE = {
