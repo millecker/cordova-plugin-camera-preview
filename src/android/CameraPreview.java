@@ -921,7 +921,7 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
 	double sensorWidth = Math.tan((double)horizontalViewAngle / 2) * 2 * focalLength;
 	double sensorHeight = Math.tan((double)verticalViewAngle / 2) * 2 * focalLength;
 	
-	CameraManager manager = (CameraManager) fragment.getSystemService(Context.CAMERA_SERVICE);
+	CameraManager manager = (CameraManager) fragment.getApplicationContext().getSystemService(Context.CAMERA_SERVICE);
 	String cameraId = getFrontFacingCameraId(manager);
     SizeF sensorSize = getCameraResolution(manager, 0);
 
