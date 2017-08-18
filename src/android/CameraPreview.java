@@ -921,7 +921,7 @@ private boolean getSupportedFocusModes(CallbackContext callbackContext) {
 	double sensorWidth = Math.tan((double)horizontalViewAngle / 2) * 2 * focalLength;
 	double sensorHeight = Math.tan((double)verticalViewAngle / 2) * 2 * focalLength;
 	
-	CameraManager manager = (CameraManager) fragment.getApplicationContext().getSystemService(Context.CAMERA_SERVICE);
+	CameraManager manager = (CameraManager) this.cordova.getActivity().getApplicationContext().getSystemService(Context.CAMERA_SERVICE);
 	String cameraId = getFrontFacingCameraId(manager);
     SizeF sensorSize = getCameraResolution(manager, 0);
 
@@ -948,7 +948,7 @@ private SizeF getCameraResolution(CameraManager cManager, int camNum)
     try {
         String[] cameraIds = cManager.getCameraIdList();
         if (cameraIds.length > camNum) {
-            CameraCharacteristics character = manager.getCameraCharacteristics(cameraIds[camNum]);
+            CameraCharacteristics character = cManager.getCameraCharacteristics(cameraIds[camNum]);
             size = character.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
         }
     }
