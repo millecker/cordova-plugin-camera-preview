@@ -65,6 +65,14 @@ If you are developing for iOS 10+ you must also add the following to your config
 </gap:config-file>
 ```
 
+### Android Quirks (older devices)
+When using the plugin for older devices, the camera preview will take the focus inside the app once initialized.
+In order to prevent the app from closing when a user presses the back button, the event for the camera view is disabled.
+If you still want the user to navigate, you can add a listener for the back event for the preview 
+(see <code>[onBackButton](#onBackButton)</code>) 
+
+
+
 # Methods
 
 ### startCamera(options, [successCallback, errorCallback])
@@ -79,7 +87,7 @@ All options stated are optional and will default to values here
 * `y` - Defaults to 0
 * `width` - Defaults to window.screen.width
 * `height` - Defaults to window.screen.height
-* `camera` - See <code>[CAMERA_DIRECTION](#camera_Settings.CameraDirection)</code> - Defaults to front camera/code>
+* `camera` - See <code>[CAMERA_DIRECTION](#camera_Settings.CameraDirection)</code> - Defaults to front camera
 * `toBack` - Defaults to false - Set to true if you want your html in front of your preview
 * `tapPhoto` - Defaults to true - Does not work if toBack is set to false in which case you use the takePicture method
 * `tapFocus` - Defaults to false - Allows the user to tap to focus, when the view is in the foreground
@@ -225,6 +233,22 @@ CameraPreview.getFlashMode(function(currentFlashMode){
   console.log(currentFlashMode);
 });
 ```
+
+### getSupportedColorEffects(cb, [errorCallback])
+
+*Currently this feature is for Android only. A PR for iOS support would be happily accepted*
+
+<info>Get color modes supported by the camera device currently started. Returns an array containing supported color effects (strings). See <code>[COLOR_EFFECT](#camera_Settings.ColorEffect)</code> for possible values that can be returned.</info><br/>
+
+```javascript
+CameraPreview.getSupportedColorEffects(function(colorEffects){
+  colorEffects.forEach(function(color) {
+    console.log(color + ', ');
+  });
+});
+```
+
+
 ### setColorEffect(colorEffect, [successCallback, errorCallback])
 
 <info>Set the color effect. See <code>[COLOR_EFFECT](#camera_Settings.ColorEffect)</code> for details about the possible values for colorEffect.</info><br/>
@@ -371,19 +395,13 @@ let yPoint = event.y
 CameraPreview.tapToFocus(xPoint, yPoint);
 ```
 
-### getCameraCharacteristics(cb, [errorCallback])
+### onBackButton(successCallback, [errorCallback])
 
-<info>Get the characteristics of all available cameras. Returns a JSON object representing the characteristics of all available cameras.</info>
-<code>
-{"CAMERA_CHARACTERISTICS": [
-  {"INFO_SUPPORTED_HARDWARE_LEVEL":1,"LENS_FACING":1,"SENSOR_INFO_PHYSICAL_SIZE_WIDTH":5.644999980926514,"SENSOR_INFO_PHYSICAL_SIZE_HEIGHT":4.434999942779541,"SENSOR_INFO_PIXEL_ARRAY_SIZE_WIDTH":4032,"SENSOR_INFO_PIXEL_ARRAY_SIZE_HEIGHT":3024,"LENS_INFO_AVAILABLE_FOCAL_LENGTHS":[{"FOCAL_LENGTH":4.199999809265137}]},
-  {"INFO_SUPPORTED_HARDWARE_LEVEL":0,"LENS_FACING":0,"SENSOR_INFO_PHYSICAL_SIZE_WIDTH":3.494999885559082,"SENSOR_INFO_PHYSICAL_SIZE_HEIGHT":2.625999927520752,"SENSOR_INFO_PIXEL_ARRAY_SIZE_WIDTH":2608,"SENSOR_INFO_PIXEL_ARRAY_SIZE_HEIGHT":1960,"LENS_INFO_AVAILABLE_FOCAL_LENGTHS":[{"FOCAL_LENGTH":2.0999999046325684}]}
-]}
-</code><br/>
+<info>Callback event for the back button tap</info><br/>
 
 ```javascript
-CameraPreview.getCameraCharacteristics(function(characteristics){
-  console.log(characteristics);
+CameraPreview.onBackButton(function() {
+  console.log('Back button pushed');
 });
 ```
 

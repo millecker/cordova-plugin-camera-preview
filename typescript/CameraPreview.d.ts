@@ -47,6 +47,7 @@ interface CameraPreview {
   setPreviewSize(dimensions?:CameraPreviewPreviewSizeDimension|string, onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
   getSupportedPictureSizes(onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
   getSupportedFlashModes(onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
+  getSupportedColorEffects(onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
   setFlashMode(flashMode:CameraPreviewFlashMode|string, onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
   getSupportedFocusModes(onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
   getFocusMode(onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
@@ -61,5 +62,5 @@ interface CameraPreview {
   getSupportedWhiteBalanceModes(onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
   getSupportedWhiteBalanceMode(onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
   setWhiteBalanceMode(whiteBalanceMode?:CameraPreviewWhiteBalanceMode|string, onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
-  getCameraCharacteristics(onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
+  onBackButton(onSuccess?:CameraPreviewSuccessHandler, onError?:CameraPreviewErrorHandler):void;
 }

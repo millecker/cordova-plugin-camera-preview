@@ -104,6 +104,10 @@ CameraPreview.getSupportedFlashModes = function(onSuccess, onError) {
     exec(onSuccess, onError, PLUGIN_NAME, "getSupportedFlashModes", []);
 };
 
+CameraPreview.getSupportedColorEffects = function(onSuccess, onError) {
+    exec(onSuccess, onError, PLUGIN_NAME, "getSupportedColorEffects", []);
+};
+
 CameraPreview.setFlashMode = function(flashMode, onSuccess, onError) {
     exec(onSuccess, onError, PLUGIN_NAME, "setFlashMode", [flashMode]);
 };
@@ -165,8 +169,8 @@ CameraPreview.setWhiteBalanceMode = function(whiteBalanceMode, onSuccess, onErro
     exec(onSuccess, onError, PLUGIN_NAME, "setWhiteBalanceMode", [whiteBalanceMode]);
 };
 
-CameraPreview.getCameraCharacteristics = function(onSuccess, onError) {
-    exec(onSuccess, onError, PLUGIN_NAME, "getCameraCharacteristics", []);
+CameraPreview.onBackButton = function(onSuccess, onError) {
+  exec(onSuccess, onError, PLUGIN_NAME, "onBackButton");
 };
 
 CameraPreview.FOCUS_MODE = {
