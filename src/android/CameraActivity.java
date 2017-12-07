@@ -473,14 +473,17 @@ public class CameraActivity extends Fragment {
     double aspectTolerance = 0.1;
     double bestDifference = Double.MAX_VALUE;
 
+    // Try to find a perfect match
     for (int i = 0; i < supportedSizes.size(); i++) {
       Camera.Size supportedSize = supportedSizes.get(i);
-
-      // Perfect match
       if (supportedSize.equals(size)) {
-        Log.d(TAG, "CameraPreview optimalPictureSize " + supportedSize.width + 'x' + supportedSize.height);
+        Log.d(TAG, "CameraPreview perfect match optimalPictureSize " + supportedSize.width + 'x' + supportedSize.height);
         return supportedSize;
       }
+    }
+
+    for (int i = 0; i < supportedSizes.size(); i++) {
+      Camera.Size supportedSize = supportedSizes.get(i);
 
       double difference = Math.abs(previewAspectRatio - ((double)supportedSize.width / (double)supportedSize.height));
 
